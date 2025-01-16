@@ -4,6 +4,7 @@ import {
 } from "@react-navigation/native-stack";
 import { Home } from "../screens/Home";
 import { Model } from "../screens/Model";
+import { RouteProp } from "@react-navigation/native";
 
 type AppRoutes = {
   home: undefined;

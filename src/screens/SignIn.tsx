@@ -4,14 +4,17 @@ import {
   TouchableOpacity,
   Alert,
   View,
+  ActivityIndicator,
 } from "react-native";
 import backgroundImg from "../assets/background.png";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "../components/Input";
-import { apiLogin } from "../service/api";
+import { useAuth } from "../hooks/userAuth";
 import { AppErrors } from "../utils/AppErrors";
+import colors from "tailwindcss/colors";
+import { useState } from "react";
 
 const schema = z.object({
   user: z.string().min(1, "Campo Obrigatório"),
@@ -21,6 +24,7 @@ const schema = z.object({
 export type FormData = z.infer<typeof schema>;
 
 export function SignIn() {
+  const [loading, setLoading] = useState(false);
   const { control, handleSubmit } = useForm<FormData>({
     mode: "onChange",
     resolver: zodResolver(schema),
@@ -30,11 +34,14 @@ export function SignIn() {
     },
   });
 
+  const { signIn } = useAuth();
+
   const onSubmit: SubmitHandler<FormData> = async ({ user, password }) => {
     try {
-      const response = await apiLogin.post("/signIn", { user, password });
-      console.log(response.data);
+      setLoading(true);
+      await signIn(user, password);
     } catch (error) {
+      setLoading(false);
       if (error instanceof AppErrors) {
         Alert.alert(error.message);
       } else {
@@ -61,12 +68,17 @@ export function SignIn() {
         <Input name="password" control={control} label="Senha" />
         <TouchableOpacity
           onPress={handleSubmit(onSubmit)}
-          className="w-full bg-emerald-600 rounded-md px-2 py-4"
+          className="w-full bg-emerald-600 rounded-md px-2 py-4 disabled:opacity-80"
           activeOpacity={0.8}
+          disabled={loading}
         >
-          <Text className="text-white text-center font-bold text-lg">
-            Entrar
-          </Text>
+          {loading ? (
+            <ActivityIndicator color={colors.zinc[800]} />
+          ) : (
+            <Text className="text-white text-center font-bold text-lg">
+              Entrar
+            </Text>
+          )}
         </TouchableOpacity>
       </View>
     </ImageBackground>
