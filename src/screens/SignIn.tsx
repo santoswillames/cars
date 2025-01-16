@@ -10,9 +10,11 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "../components/Input";
+import { apiLogin } from "../service/api";
+import { AppErrors } from "../utils/AppErrors";
 
 const schema = z.object({
-  name: z.string().min(1, "Campo Obrigatório"),
+  user: z.string().min(1, "Campo Obrigatório"),
   password: z.string().min(1, "Campo obrigatório"),
 });
 
@@ -23,13 +25,24 @@ export function SignIn() {
     mode: "onChange",
     resolver: zodResolver(schema),
     defaultValues: {
-      name: "",
+      user: "",
       password: "",
     },
   });
 
-  const onSubmit: SubmitHandler<FormData> = (data) => {
-    Alert.alert("Form Data", JSON.stringify(data));
+  const onSubmit: SubmitHandler<FormData> = async ({ user, password }) => {
+    try {
+      const response = await apiLogin.post("/signIn", { user, password });
+      console.log(response.data);
+    } catch (error) {
+      if (error instanceof AppErrors) {
+        Alert.alert(error.message);
+      } else {
+        Alert.alert(
+          "Não foi possível realizar login! Tente novamente mais tarde."
+        );
+      }
+    }
   };
 
   return (
@@ -44,7 +57,7 @@ export function SignIn() {
         Veja todos os modelos de carros de uma marca
       </Text>
       <View className="gap-4">
-        <Input name="name" control={control} label="Nome" />
+        <Input name="user" control={control} label="Usuário" />
         <Input name="password" control={control} label="Senha" />
         <TouchableOpacity
           onPress={handleSubmit(onSubmit)}
