@@ -10,6 +10,7 @@ import { Loading } from "./components/Loading";
 import { StatusBar } from "react-native";
 import { Routes } from "./routes";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { AuthContext } from "./contexts/AuthContext";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -29,7 +30,9 @@ export default function App() {
         backgroundColor="transparent"
         translucent
       />
-      <Routes />
+      <AuthContext.Provider value={{}}>
+        <Routes />
+      </AuthContext.Provider>
     </SafeAreaProvider>
   );
 }
